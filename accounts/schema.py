@@ -1,7 +1,9 @@
 from django.contrib.auth import get_user_model
 
 import graphene
+import graphql_jwt
 from graphene_django import DjangoObjectType
+from graphql_jwt.shortcuts import create_refresh_token, get_token
 
 from accounts.selectors import get_user_by_phone_number
 from accounts.services import get_or_create_user
@@ -16,7 +18,7 @@ class UserType(DjangoObjectType):
         model = get_user_model()
         fields = (
             'id', 'phone_number', 'is_active', 'first_name', 'last_name',
-            'is_superuser', 'is_staff', 'is_verify','verify_date',
+            'is_superuser', 'is_staff', 'is_verify', 'verify_date',
         )
 
 
@@ -55,6 +57,8 @@ class VerifyOtp(graphene.Mutation):
     message = graphene.String()
     is_new_user = graphene.String(default_value=None)
     user = graphene.Field(UserType, default_value=None)
+    access_token = graphene.String(default_value=None)
+    refresh_token = graphene.String(default_value=None)
 
     @staticmethod
     def mutate(root, info, phone_number, code):
@@ -72,12 +76,22 @@ class VerifyOtp(graphene.Mutation):
         # create or get user
         user, is_new_user = get_or_create_user(phone_number=phone_number)
 
+        # create jwt token
+        access_token = get_token(user)
+        refresh_token = create_refresh_token(user)
+
         # delete otp code from cache
         redis_delete(key=phone_number)
 
-        return VerifyOtp(ok=True, is_new_user=is_new_user, message='successfully', user=user)
+        return VerifyOtp(
+            ok=True, is_new_user=is_new_user, message='successfully',
+            user=user, access_token=access_token, refresh_token=refresh_token
+        )
 
 
 class Mutation(graphene.ObjectType):
     request_otp = RequestOtp.Field()
     verify_otp = VerifyOtp.Field()
+
+    verify_token = graphql_jwt.Verify.Field()
+    refresh_token = graphql_jwt.Refresh.Field()
