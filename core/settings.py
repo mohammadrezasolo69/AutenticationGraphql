@@ -130,3 +130,7 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 GRAPHENE = {
     "SCHEMA": "core.schema.schema"
 }
+
+# Redis Config
+REDIS_HOST = env("REDIS_HOST")
+REDIS_PORT = env("REDIS_PORT")
