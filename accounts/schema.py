@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 
 import graphene
 import graphql_jwt
+from graphql_jwt.decorators import login_required
 from graphene_django import DjangoObjectType
 from graphql_jwt.shortcuts import create_refresh_token, get_token
 
@@ -26,6 +27,7 @@ class Query(graphene.ObjectType):
     user = graphene.Field(UserType, phone_number=graphene.String())
 
     @staticmethod
+    @login_required
     def resolve_user(root, info, phone_number=None):
         user = get_user_by_phone_number(phone_number=phone_number)
         return user
