@@ -31,6 +31,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # 3rd party
+    "graphene_django",
+
     # my apps
     'accounts.apps.AccountsConfig',
 ]
@@ -122,3 +125,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom User
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+# Config Graphene
+GRAPHENE = {
+    "SCHEMA": "core.schema.schema"
+}
