@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 import graphene
 from graphene_django import DjangoObjectType
 
+from accounts.selectors import get_user_by_phone_number
 from accounts.services import get_or_create_user
 from utils.redis_connection import redis_set, redis_get, redis_delete
 from utils.generate_random_code import generate_random
@@ -13,11 +14,19 @@ from utils.sender import sms_sender
 class UserType(DjangoObjectType):
     class Meta:
         model = get_user_model()
-        fields = ('id', 'phone_number', 'is_active')
+        fields = (
+            'id', 'phone_number', 'is_active', 'first_name', 'last_name',
+            'is_superuser', 'is_staff', 'is_verify','verify_date',
+        )
 
 
 class Query(graphene.ObjectType):
-    pass
+    user = graphene.Field(UserType, phone_number=graphene.String())
+
+    @staticmethod
+    def resolve_user(root, info, phone_number=None):
+        user = get_user_by_phone_number(phone_number=phone_number)
+        return user
 
 
 # ------------------------------------- Mutation -------------------------------------------------

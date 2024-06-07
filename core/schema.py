@@ -2,8 +2,11 @@ import graphene
 import accounts.schema
 
 
-class Query(graphene.ObjectType):
-    name = graphene.String()
+class Query(
+    accounts.schema.Query,
+    graphene.ObjectType
+):
+    pass
 
 
 class Mutation(
