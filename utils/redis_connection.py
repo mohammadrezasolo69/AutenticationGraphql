@@ -8,8 +8,7 @@ redis_instance = redis.StrictRedis(host=settings.REDIS_HOST, port=settings.REDIS
 
 
 def redis_set(key: str, data: str, ex: int = 120) -> str:
-    json_string = json.dumps(data)
-    items = redis_instance.set(key, json_string, ex)
+    items = redis_instance.set(key, data, ex)
     return items
 
 
@@ -18,3 +17,8 @@ def redis_get(key: str) -> str:
     if item:
         item = json.loads(item)
     return item
+
+
+def redis_delete(key):
+    _ = redis_instance.delete(key)
+    return True
