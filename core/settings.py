@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import environ
 import os
 
@@ -33,6 +35,7 @@ INSTALLED_APPS = [
 
     # 3rd party
     "graphene_django",
+    "graphql_jwt.refresh_token.apps.RefreshTokenConfig",
 
     # my apps
     'accounts.apps.AccountsConfig',
@@ -128,9 +131,30 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # Config Graphene
 GRAPHENE = {
-    "SCHEMA": "core.schema.schema"
+    "SCHEMA": "core.schema.schema",
+    "MIDDLEWARE": [
+        "graphql_jwt.middleware.JSONWebTokenMiddleware",
+    ],
 }
 
 # Redis Config
 REDIS_HOST = env("REDIS_HOST")
 REDIS_PORT = env("REDIS_PORT")
+
+
+# Authentication Backend
+AUTHENTICATION_BACKENDS = [
+    "graphql_jwt.backends.JSONWebTokenBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+# GRAPHQL_JWT Config
+GRAPHQL_JWT = {
+    "JWT_AUTH_HEADER_PREFIX": "Bearer",
+    "JWT_VERIFY_EXPIRATION": True,
+    "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
+    "JWT_EXPIRATION_DELTA": timedelta(minutes=10),
+    "JWT_REFRESH_EXPIRATION_DELTA": timedelta(days=7),
+    "JWT_SECRET_KEY": SECRET_KEY,
+    "JWT_ALGORITHM": env("JWT_ALGORITHM"),
+}
