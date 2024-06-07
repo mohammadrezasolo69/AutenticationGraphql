@@ -11,13 +11,12 @@ class CustomUser(AbstractUser):
         ordering = ('-id',)
 
     username = None
-    password = None
 
     phone_number_validator = RegexValidator(regex=r'^\+?1?\d{9,15}$', message="phone number not formatted correctly")
     phone_number = models.CharField(
         max_length=12, unique=True, verbose_name='Phone Number', db_index=True, validators=[phone_number_validator])
     is_verify = models.BooleanField(default=False, verbose_name='Verify')
-    verify_date = models.DateTimeField(verbose_name='Verify Date')
+    verify_date = models.DateTimeField(verbose_name='Verify Date',null=True, blank=True)
     create_date = models.DateTimeField(auto_now_add=True)
 
     objects = CustomUserManager()
