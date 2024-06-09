@@ -91,9 +91,32 @@ class VerifyOtp(graphene.Mutation):
         )
 
 
+class ChangePassword(graphene.Mutation):
+    class Arguments:
+        new_password = graphene.String()
+        repeat_new_password = graphene.String()
+
+    ok = graphene.Boolean()
+    message = graphene.String()
+    user = graphene.Field(UserType, default_value=None)
+
+    @staticmethod
+    @login_required
+    def mutate(root, info, new_password: str, repeat_new_password: str):
+        if new_password != repeat_new_password:
+            return ChangePassword(ok=False, message=f'new_password and repeat_new_password not match .')
+
+        user = info.context.user
+        user.set_password(new_password)
+        user.save(update_fields=['password'])
+
+        return ChangePassword(ok=True, message=f'password is change', user=user)
+
+
 class Mutation(graphene.ObjectType):
     request_otp = RequestOtp.Field()
     verify_otp = VerifyOtp.Field()
-
     verify_token = graphql_jwt.Verify.Field()
     refresh_token = graphql_jwt.Refresh.Field()
+
+    change_password = ChangePassword.Field()
