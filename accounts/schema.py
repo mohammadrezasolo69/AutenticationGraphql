@@ -7,7 +7,7 @@ from graphene_django import DjangoObjectType
 from graphql_jwt.shortcuts import create_refresh_token, get_token
 
 from accounts.selectors import get_user_by_phone_number
-from accounts.services import get_or_create_user
+from accounts.services import get_or_create_user, update_profile_user
 from utils.redis_connection import redis_set, redis_get, redis_delete
 from utils.generate_random_code import generate_random
 from utils.sender import sms_sender
@@ -113,6 +113,24 @@ class ChangePassword(graphene.Mutation):
         return ChangePassword(ok=True, message=f'password is change', user=user)
 
 
+class UpdateProfile(graphene.Mutation):
+    class Arguments:
+        phone_number = graphene.String()
+        first_name = graphene.String()
+        last_name = graphene.String()
+        email = graphene.String()
+
+    ok = graphene.Boolean()
+    message = graphene.String()
+    user = graphene.Field(UserType)
+
+    @staticmethod
+    @login_required
+    def mutate(root, info, *args, **kwargs):
+        user = update_profile_user(user=info.context.user, items=kwargs)
+        return UpdateProfile(ok=True, message=f'profile updated.', user=user)
+
+
 class Mutation(graphene.ObjectType):
     request_otp = RequestOtp.Field()
     verify_otp = VerifyOtp.Field()
@@ -120,3 +138,5 @@ class Mutation(graphene.ObjectType):
     refresh_token = graphql_jwt.Refresh.Field()
 
     change_password = ChangePassword.Field()
+
+    update_profile = UpdateProfile.Field()
