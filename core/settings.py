@@ -157,4 +157,5 @@ GRAPHQL_JWT = {
     "JWT_REFRESH_EXPIRATION_DELTA": timedelta(days=7),
     "JWT_SECRET_KEY": SECRET_KEY,
     "JWT_ALGORITHM": env("JWT_ALGORITHM"),
+    "JWT_PAYLOAD_HANDLER" : 'utils.jwt_payload_handler.jwt_payload_handler'
 }
